@@ -32,25 +32,27 @@
             cursor: wait;
         }
         
-        .video-background {
+        #video-background {
             position: fixed;
             top: 50%;
             left: 50%;
             min-width: 100%;
             min-height: 100%;
-            width: auto;
-            height: auto;
+            width: 100vw;
+            height: 56.25vw;
+            min-height: 100vh;
+            min-width: 177.77vh;
             transform: translate(-50%, -50%);
             z-index: -2;
             pointer-events: none;
-            object-fit: cover;
         }
 
         #audio-player { position: fixed; top: -9999px; }
         .video-overlay {
             position: fixed; top: 0; left: 0;
             width: 100%; height: 100%;
-            z-index: -1; opacity: 0.1;
+            z-index: -1; 
+            background: rgba(0, 0, 0, 0.3);
             pointer-events: none;
         }
         #main-content {
@@ -142,10 +144,7 @@
     </div>
 
     <div class="video-overlay"></div>
-    <video autoplay muted loop playsinline class="video-background">
-        <source src="https://cdn.discordapp.com/attachments/1327684785748967425/1431980055126474965/tlo.mp4?ex=68ff62da&is=68fe115a&hm=881deffeb62aefc2a0fc67a58761efe97a9a9a5190d3dc322bcdc2c4d299d7f8&" type="video/mp4">
-        Twoja przeglądarka nie obsługuje wideo.
-    </video>
+    <div id="video-background"></div>
     
     <div id="audio-player"></div>
 
@@ -186,10 +185,13 @@
         const mainContent = document.getElementById('main-content');
         
         const musicId = 'E2XlrfITyCk';
+        const videoId = 'YAFUyPp_238';
         const discordUserId = '1206130401232289823'; 
 
-        let audioPlayer; 
+        let audioPlayer;
+        let videoPlayer;
         let isAudioReady = false;
+        let isVideoReady = false;
 
         splashScreen.addEventListener('click', () => {
              if (!isAudioReady) return; 
@@ -202,6 +204,11 @@
             if (audioPlayer && typeof audioPlayer.playVideo === 'function') {
                 audioPlayer.setVolume(20);
                 audioPlayer.playVideo();
+            }
+            
+            if (videoPlayer && typeof videoPlayer.playVideo === 'function') {
+                videoPlayer.setVolume(0);
+                videoPlayer.playVideo();
             }
         });
 
@@ -229,6 +236,30 @@
                              splashScreen.style.cursor = 'pointer';
                              isAudioReady = true;
                          }
+                    }
+                });
+                
+                videoPlayer = new YT.Player('video-background', {
+                    videoId: videoId,
+                    playerVars: {
+                        'autoplay': 0,
+                        'controls': 0,
+                        'loop': 1,
+                        'playlist': videoId,
+                        'mute': 1,
+                        'playsinline': 1,
+                        'modestbranding': 1,
+                        'rel': 0,
+                        'showinfo': 0
+                    },
+                    events: {
+                        'onReady': () => {
+                            isVideoReady = true;
+                            videoPlayer.setVolume(0);
+                        },
+                        'onError': (error) => {
+                            console.error("Błąd wideo YouTube:", error);
+                        }
                     }
                 });
             } catch (e) {
