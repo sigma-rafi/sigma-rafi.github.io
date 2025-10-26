@@ -29,7 +29,8 @@
             font-size: 2.5rem;
             z-index: 1000;
             transition: opacity 0.5s ease-out;
-            cursor: pointer; 
+            /* Domyślnie kursor 'wait', dopóki muzyka nie będzie gotowa */
+            cursor: wait; 
         }
         
         .video-background {
@@ -52,8 +53,6 @@
             width: 100%; height: 100%;
             z-index: -1; opacity: 0.1;
             pointer-events: none;
-            /* Usunięto Base64, bo był źródłem błędów, zostawiamy subtelny szum CSS */
-             /* background-image: url('...'); */
         }
         #main-content {
             display: none; flex-direction: column;
@@ -146,13 +145,13 @@
 <body>
 
     <div id="splash-screen">
-        click
+        Ładowanie... 
     </div>
 
     <div class="video-overlay"></div>
     <video autoplay muted loop playsinline class="video-background">
         <source src="tlo.mp4" type="video/mp4">
-        Your browser does not support video.
+        Twoja przeglądarka nie obsługuje wideo.
     </video>
     
     <div id="audio-player"></div>
@@ -203,15 +202,20 @@
         const discordUserId = '1206130401232289823'; 
 
         let audioPlayer; 
+        // POPRAWKA: Flaga sprawdzająca, czy muzyka jest gotowa
+        let isAudioReady = false; 
 
         // --- Funkcja Startowa ---
         splashScreen.addEventListener('click', () => {
+            // Pozwól kliknąć tylko gdy muzyka jest gotowa
+            if (!isAudioReady) return; 
+            
             splashScreen.style.opacity = '0';
             setTimeout(() => { splashScreen.style.display = 'none'; }, 500);
             
             mainContent.style.display = 'flex';
             
-            // Spróbuj odtworzyć muzykę, gdy jest gotowa
+            // Odtwórz muzykę (teraz mamy pewność, że istnieje)
             if (audioPlayer && typeof audioPlayer.playVideo === 'function') {
                 audioPlayer.setVolume(20); // Cicha muzyka
                 audioPlayer.playVideo();
@@ -232,155 +236,17 @@
             try {
                 audioPlayer = new YT.Player('audio-player', {
                     height: '1', width: '1', videoId: musicId,
-                    playerVars: { 'autoplay': 0, 'controls': 0, 'loop': 1, 'playlist': musicId }
+                    playerVars: { 'autoplay': 0, 'controls': 0, 'loop': 1, 'playlist': musicId },
+                    events: {
+                        'onReady': () => { 
+                            // POPRAWKA: Kiedy muzyka jest gotowa, zmień napis i flagę
+                            splashScreen.textContent = 'click';
+                            splashScreen.style.cursor = 'pointer';
+                            isAudioReady = true;
+                        }
+                    }
                 });
             } catch (e) {
-                console.error("Error creating YouTube player:", e);
-                // Handle error if YT API fails to load or initialize
-            }
-        }
-        
-        loadYouTubeAPI(); 
-
-        // --- 2. Ładowanie Statusu Discord (Lanyard) ---
-        function getLanyardData() {
-            fetch(`https://api.lanyard.rest/v1/users/${discordUserId}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                 })
-                .then(data => {
-                    if (!data.success) {
-                         console.error('Lanyard API returned success:false');
-                         return; // Don't proceed if API indicates failure
-                    };
-                    const presence = data.data;
-                    const card = document.getElementById('discord-card');
-                    const avatar = document.getElementById('discord-avatar');
-                    const name = document.getElementById('discord-name');
-                    const status = document.getElementById('discord-status');
-
-                    if (!avatar || !name || !status || !card) {
-                        console.error("One or more Discord elements not found");
-                        return;
-                    }
-
-                    avatar.src = `https://cdn.discordapp.com/avatars/${presence.discord_user.id}/${presence.discord_user.avatar}.png`;
-                    name.textContent = presence.discord_user.username;
-                    card.className = presence.discord_status || 'offline'; // Default to offline if status missing
-
-                    let statusText = 'Offline';
-                    if (presence.discord_status && presence.discord_status !== 'offline') {
-                        if (presence.activities && presence.activities.length > 0) {
-                            statusText = presence.activities[0].name || 'Aktywność'; // Provide default if name is missing
-                            if (presence.activities[0].details) statusText += `: ${presence.activities[0].details}`;
-                        } else {
-                            switch(presence.discord_status) {
-                                case 'online': statusText = 'Online'; break;
-                                case 'idle': statusText = 'Zaraz wracam'; break;
-                                case 'dnd': statusText = 'Nie przeszkadzać'; break;
-                                default: statusText = 'Online'; // Default case
-                            }
-                        }
-                    }
-                    status.textContent = statusText;
-                })
-                .catch(error => {
-                    console.error('Błąd Lanyard fetch:', error);
-                     const name = document.getElementById('discord-name');
-                     const status = document.getElementById('discord-status');
-                     if(name) name.textContent = 'Błąd';
-                     if(status) status.textContent = 'Nie można połączyć';
-                });
-        }
-        // Run immediately and then every 10 seconds
-        try {
-           getLanyardData();
-           setInterval(getLanyardData, 10000);
-        } catch (e) {
-           console.error("Failed to set up Lanyard polling:", e);
-        }
-
-
-        // --- 3. Licznik Odwiedzin (CountAPI) ---
-        function updateVisitorCount() {
-            const apiKey = '1206130401232289823-sigma-rafi'; 
-            const visitsSpan = document.getElementById('visits-count');
-            
-            // Only fetch if the element exists
-            if (visitsSpan) {
-                fetch(`https://api.countapi.xyz/hit/${apiKey}/visits`)
-                    .then(response => {
-                        // Check if response is ok (status in the range 200-299)
-                        if (!response.ok) {
-                            // If not ok, throw an error to be caught by .catch()
-                             throw new Error(`Network response was not ok, status: ${response.status}`);
-                        }
-                         // Attempt to parse JSON
-                         return response.json();
-                    })
-                    .then(data => {
-                        // Check if data has the expected 'value' property
-                        if (data && typeof data.value !== 'undefined') {
-                            visitsSpan.textContent = data.value;
-                        } else {
-                            // Data format is unexpected
-                            console.error('Błąd licznika: Nieprawidłowy format danych', data);
-                             visitsSpan.textContent = '??';
-                        }
-                    })
-                    .catch(error => {
-                        // Catch fetch errors (network issues, DNS resolution etc.)
-                        // And errors thrown from the first .then() (bad response status)
-                        // And errors during JSON parsing
-                        console.error('Błąd licznika fetch:', error);
-                        visitsSpan.textContent = '??'; // Display error indicator
-                    });
-            } else {
-                 console.error("Element #visits-count not found for visitor counter.");
-            }
-        }
-        
-        // --- 4. Logika Modala ---
-        const modalOverlay = document.getElementById('modal-overlay');
-        const modalBox = document.getElementById('modal-box');
-        const modalConfirm = document.getElementById('modal-confirm');
-        const modalCancel = document.getElementById('modal-cancel');
-        let targetUrl = ''; 
-        const confirmLinks = document.querySelectorAll('.confirm-link');
-        
-        // Check if modal elements exist before adding listeners
-        if (modalOverlay && modalBox && modalConfirm && modalCancel) {
-            confirmLinks.forEach(link => {
-                link.addEventListener('click', (event) => {
-                    event.preventDefault(); 
-                    targetUrl = event.currentTarget.href; 
-                    modalOverlay.style.display = 'block';
-                    modalBox.style.display = 'block';
-                });
-            });
-            
-            function closeModal() {
-                modalOverlay.style.display = 'none';
-                modalBox.style.display = 'none';
-                targetUrl = '';
-            }
-
-            modalCancel.addEventListener('click', closeModal);
-            modalOverlay.addEventListener('click', closeModal); // Clicking background closes modal
-            
-            modalConfirm.addEventListener('click', () => {
-                 if (targetUrl) { // Only open if a URL was actually stored
-                    window.open(targetUrl, '_blank'); 
-                 }
-                closeModal();
-            });
-        } else {
-            console.error("One or more modal elements not found.");
-        }
-    </script>
-
-</body>
-</html>
+                console.error("Błąd tworzenia odtwarzacza YouTube:", e);
+                // W razie błędu API, pozwól kliknąć, ale muzyki nie będzie
+                 splashScreen.textContent = 'click (Błąd muzyki)';
