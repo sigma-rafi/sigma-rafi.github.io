@@ -29,8 +29,7 @@
             font-size: 2.5rem;
             z-index: 1000;
             transition: opacity 0.5s ease-out;
-            /* Domyślnie kursor 'wait', dopóki muzyka nie będzie gotowa */
-            cursor: wait; 
+            cursor: pointer; /* Od razu pointer */
         }
         
         .video-background {
@@ -145,7 +144,7 @@
 <body>
 
     <div id="splash-screen">
-        Ładowanie... 
+        click
     </div>
 
     <div class="video-overlay"></div>
@@ -206,21 +205,21 @@
 
         // --- Funkcja Startowa ---
         splashScreen.addEventListener('click', () => {
-             // Pozwól kliknąć tylko gdy muzyka jest gotowa, aby uniknąć błędu
-             if (!isAudioReady) return; 
-
             splashScreen.style.opacity = '0';
             setTimeout(() => { splashScreen.style.display = 'none'; }, 500);
             
             mainContent.style.display = 'flex';
             
-            // Odtwórz muzykę (teraz mamy pewność, że istnieje)
-            if (audioPlayer && typeof audioPlayer.playVideo === 'function') {
+            // Spróbuj odtworzyć muzykę, jeśli jest gotowa
+            if (isAudioReady && audioPlayer && typeof audioPlayer.playVideo === 'function') {
                 audioPlayer.setVolume(20); // Cicha muzyka
                 audioPlayer.playVideo();
+            } else {
+                console.log("Audio player not ready or failed to load when splash screen clicked.");
             }
             
-            updateVisitorCount(); // Uruchom licznik
+            // POPRAWKA: Uruchom licznik dopiero po kliknięciu
+            updateVisitorCount(); 
         });
 
         // --- 1. Ładowanie API YouTube (Tylko dla muzyki) ---
@@ -228,7 +227,11 @@
             const tag = document.createElement('script');
             tag.src = 'https://www.youtube.com/iframe_api';
             const firstScriptTag = document.getElementsByTagName('script')[0];
-            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+            if (firstScriptTag && firstScriptTag.parentNode) {
+                firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+            } else {
+                 document.head.appendChild(tag); // Fallback if no script tags found
+            }
         }
 
         window.onYouTubeIframeAPIReady = function() {
@@ -238,24 +241,19 @@
                     playerVars: { 'autoplay': 0, 'controls': 0, 'loop': 1, 'playlist': musicId },
                      events: {
                         'onReady': () => { 
-                            // Kiedy muzyka jest gotowa, zmień napis i flagę
-                            splashScreen.textContent = 'click';
-                            splashScreen.style.cursor = 'pointer';
+                            // Muzyka gotowa
                             isAudioReady = true;
+                            // Nie zmieniamy już napisu 'click', bo jest domyślnie
                         },
                          'onError': (error) => {
                              console.error("Błąd odtwarzacza YouTube:", error);
-                             splashScreen.textContent = 'click (Błąd muzyki)';
-                             splashScreen.style.cursor = 'pointer';
-                             isAudioReady = true; // Pozwól kontynuować bez muzyki
+                             isAudioReady = false; // Muzyka nie będzie grać
                          }
                     }
                 });
             } catch (e) {
                 console.error("Błąd tworzenia odtwarzacza YouTube:", e);
-                 splashScreen.textContent = 'click (Błąd muzyki)';
-                 splashScreen.style.cursor = 'pointer';
-                 isAudioReady = true; // Pozwól kontynuować bez muzyki
+                isAudioReady = false; // Muzyka nie będzie grać
             }
         }
         
@@ -282,7 +280,8 @@
                     const status = document.getElementById('discord-status');
 
                     if (!avatar || !name || !status || !card) {
-                        console.error("Nie znaleziono jednego lub więcej elementów Discord");
+                        // Elementy mogą nie istnieć jeśli main-content jest ukryty
+                        // console.error("Nie znaleziono jednego lub więcej elementów Discord");
                         return;
                     }
 
@@ -307,7 +306,8 @@
                     status.textContent = statusText;
                 })
                 .catch(error => {
-                    console.error('Błąd fetch Lanyard:', error);
+                    // Ten błąd jest normalny, jeśli strona jest otwarta długo bez internetu
+                    // console.error('Błąd fetch Lanyard:', error); 
                      const name = document.getElementById('discord-name');
                      const status = document.getElementById('discord-status');
                      if(name) name.textContent = 'Błąd';
@@ -315,8 +315,8 @@
                 });
         }
         try {
-           getLanyardData();
-           setInterval(getLanyardData, 10000);
+           getLanyardData(); // Uruchom od razu
+           setInterval(getLanyardData, 10000); // Odświeżaj co 10 sekund
         } catch (e) {
            console.error("Nie udało się ustawić odpytywania Lanyard:", e);
         }
@@ -344,7 +344,7 @@
                         }
                     })
                     .catch(error => {
-                        // Ten błąd (ERR_NAME_NOT_RESOLVED) oznacza problem z siecią/DNS, nie z kodem.
+                        // Błąd ERR_NAME_NOT_RESOLVED oznacza problem z siecią/DNS. Kod jest OK.
                         console.error('Błąd fetch licznika:', error); 
                         visitsSpan.textContent = '??'; 
                     });
