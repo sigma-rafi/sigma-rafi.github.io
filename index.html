@@ -202,14 +202,13 @@
         const discordUserId = '1206130401232289823'; 
 
         let audioPlayer; 
-        // POPRAWKA: Flaga sprawdzająca, czy muzyka jest gotowa
-        let isAudioReady = false; 
+        let isAudioReady = false; // Flaga sprawdzająca, czy muzyka jest gotowa
 
         // --- Funkcja Startowa ---
         splashScreen.addEventListener('click', () => {
-            // Pozwól kliknąć tylko gdy muzyka jest gotowa
-            if (!isAudioReady) return; 
-            
+             // Pozwól kliknąć tylko gdy muzyka jest gotowa, aby uniknąć błędu
+             if (!isAudioReady) return; 
+
             splashScreen.style.opacity = '0';
             setTimeout(() => { splashScreen.style.display = 'none'; }, 500);
             
@@ -237,16 +236,160 @@
                 audioPlayer = new YT.Player('audio-player', {
                     height: '1', width: '1', videoId: musicId,
                     playerVars: { 'autoplay': 0, 'controls': 0, 'loop': 1, 'playlist': musicId },
-                    events: {
+                     events: {
                         'onReady': () => { 
-                            // POPRAWKA: Kiedy muzyka jest gotowa, zmień napis i flagę
+                            // Kiedy muzyka jest gotowa, zmień napis i flagę
                             splashScreen.textContent = 'click';
                             splashScreen.style.cursor = 'pointer';
                             isAudioReady = true;
-                        }
+                        },
+                         'onError': (error) => {
+                             console.error("Błąd odtwarzacza YouTube:", error);
+                             splashScreen.textContent = 'click (Błąd muzyki)';
+                             splashScreen.style.cursor = 'pointer';
+                             isAudioReady = true; // Pozwól kontynuować bez muzyki
+                         }
                     }
                 });
             } catch (e) {
                 console.error("Błąd tworzenia odtwarzacza YouTube:", e);
-                // W razie błędu API, pozwól kliknąć, ale muzyki nie będzie
                  splashScreen.textContent = 'click (Błąd muzyki)';
+                 splashScreen.style.cursor = 'pointer';
+                 isAudioReady = true; // Pozwól kontynuować bez muzyki
+            }
+        }
+        
+        loadYouTubeAPI(); 
+
+        // --- 2. Ładowanie Statusu Discord (Lanyard) ---
+        function getLanyardData() {
+            fetch(`https://api.lanyard.rest/v1/users/${discordUserId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                 })
+                .then(data => {
+                    if (!data.success) {
+                         console.error('Lanyard API zwróciło success:false');
+                         return; 
+                    };
+                    const presence = data.data;
+                    const card = document.getElementById('discord-card');
+                    const avatar = document.getElementById('discord-avatar');
+                    const name = document.getElementById('discord-name');
+                    const status = document.getElementById('discord-status');
+
+                    if (!avatar || !name || !status || !card) {
+                        console.error("Nie znaleziono jednego lub więcej elementów Discord");
+                        return;
+                    }
+
+                    avatar.src = `https://cdn.discordapp.com/avatars/${presence.discord_user.id}/${presence.discord_user.avatar}.png`;
+                    name.textContent = presence.discord_user.username;
+                    card.className = presence.discord_status || 'offline'; 
+
+                    let statusText = 'Offline';
+                    if (presence.discord_status && presence.discord_status !== 'offline') {
+                        if (presence.activities && presence.activities.length > 0) {
+                            statusText = presence.activities[0].name || 'Aktywność'; 
+                            if (presence.activities[0].details) statusText += `: ${presence.activities[0].details}`;
+                        } else {
+                            switch(presence.discord_status) {
+                                case 'online': statusText = 'Online'; break;
+                                case 'idle': statusText = 'Zaraz wracam'; break;
+                                case 'dnd': statusText = 'Nie przeszkadzać'; break;
+                                default: statusText = 'Online'; 
+                            }
+                        }
+                    }
+                    status.textContent = statusText;
+                })
+                .catch(error => {
+                    console.error('Błąd fetch Lanyard:', error);
+                     const name = document.getElementById('discord-name');
+                     const status = document.getElementById('discord-status');
+                     if(name) name.textContent = 'Błąd';
+                     if(status) status.textContent = 'Nie można połączyć';
+                });
+        }
+        try {
+           getLanyardData();
+           setInterval(getLanyardData, 10000);
+        } catch (e) {
+           console.error("Nie udało się ustawić odpytywania Lanyard:", e);
+        }
+
+
+        // --- 3. Licznik Odwiedzin (CountAPI) ---
+        function updateVisitorCount() {
+            const apiKey = '1206130401232289823-sigma-rafi'; 
+            const visitsSpan = document.getElementById('visits-count');
+            
+            if (visitsSpan) {
+                fetch(`https://api.countapi.xyz/hit/${apiKey}/visits`)
+                    .then(response => {
+                        if (!response.ok) {
+                             throw new Error(`Odpowiedź sieciowa nie była OK, status: ${response.status}`);
+                        }
+                         return response.json();
+                    })
+                    .then(data => {
+                        if (data && typeof data.value !== 'undefined') {
+                            visitsSpan.textContent = data.value;
+                        } else {
+                            console.error('Błąd licznika: Nieprawidłowy format danych', data);
+                             visitsSpan.textContent = '??';
+                        }
+                    })
+                    .catch(error => {
+                        // Ten błąd (ERR_NAME_NOT_RESOLVED) oznacza problem z siecią/DNS, nie z kodem.
+                        console.error('Błąd fetch licznika:', error); 
+                        visitsSpan.textContent = '??'; 
+                    });
+            } else {
+                 console.error("Nie znaleziono elementu #visits-count dla licznika.");
+            }
+        }
+        
+        // --- 4. Logika Modala ---
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalBox = document.getElementById('modal-box');
+        const modalConfirm = document.getElementById('modal-confirm');
+        const modalCancel = document.getElementById('modal-cancel');
+        let targetUrl = ''; 
+        const confirmLinks = document.querySelectorAll('.confirm-link');
+        
+        if (modalOverlay && modalBox && modalConfirm && modalCancel) {
+            confirmLinks.forEach(link => {
+                link.addEventListener('click', (event) => {
+                    event.preventDefault(); 
+                    targetUrl = event.currentTarget.href; 
+                    modalOverlay.style.display = 'block';
+                    modalBox.style.display = 'block';
+                });
+            });
+            
+            function closeModal() {
+                modalOverlay.style.display = 'none';
+                modalBox.style.display = 'none';
+                targetUrl = '';
+            }
+
+            modalCancel.addEventListener('click', closeModal);
+            modalOverlay.addEventListener('click', closeModal); 
+            
+            modalConfirm.addEventListener('click', () => {
+                 if (targetUrl) { 
+                    window.open(targetUrl, '_blank'); 
+                 }
+                closeModal();
+            });
+        } else {
+            console.error("Nie znaleziono jednego lub więcej elementów modala.");
+        }
+    </script>
+
+</body>
+</html>
