@@ -32,19 +32,18 @@
             cursor: wait;
         }
         
-        #video-background {
+        .video-background {
             position: fixed;
             top: 50%;
             left: 50%;
             min-width: 100%;
             min-height: 100%;
-            width: 100vw;
-            height: 56.25vw;
-            min-height: 100vh;
-            min-width: 177.77vh;
+            width: auto;
+            height: auto;
             transform: translate(-50%, -50%);
             z-index: -2;
             pointer-events: none;
+            object-fit: cover;
         }
 
         #audio-player { position: fixed; top: -9999px; }
@@ -144,7 +143,10 @@
     </div>
 
     <div class="video-overlay"></div>
-    <div id="video-background"></div>
+    <video autoplay muted loop playsinline class="video-background">
+        <source src="https://raw.githubusercontent.com/sigma-rafi/sigma-rafi.github.io/main/tlo.mp4" type="video/mp4">
+        Twoja przeglądarka nie obsługuje wideo.
+    </video>
     
     <div id="audio-player"></div>
 
@@ -185,13 +187,10 @@
         const mainContent = document.getElementById('main-content');
         
         const musicId = 'E2XlrfITyCk';
-        const videoId = 'YAFUyPp_238';
         const discordUserId = '1206130401232289823'; 
 
         let audioPlayer;
-        let videoPlayer;
         let isAudioReady = false;
-        let isVideoReady = false;
 
         splashScreen.addEventListener('click', () => {
              if (!isAudioReady) return; 
@@ -204,11 +203,6 @@
             if (audioPlayer && typeof audioPlayer.playVideo === 'function') {
                 audioPlayer.setVolume(20);
                 audioPlayer.playVideo();
-            }
-            
-            if (videoPlayer && typeof videoPlayer.playVideo === 'function') {
-                videoPlayer.setVolume(0);
-                videoPlayer.playVideo();
             }
         });
 
