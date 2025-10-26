@@ -233,30 +233,6 @@
                          }
                     }
                 });
-                
-                videoPlayer = new YT.Player('video-background', {
-                    videoId: videoId,
-                    playerVars: {
-                        'autoplay': 0,
-                        'controls': 0,
-                        'loop': 1,
-                        'playlist': videoId,
-                        'mute': 1,
-                        'playsinline': 1,
-                        'modestbranding': 1,
-                        'rel': 0,
-                        'showinfo': 0
-                    },
-                    events: {
-                        'onReady': () => {
-                            isVideoReady = true;
-                            videoPlayer.setVolume(0);
-                        },
-                        'onError': (error) => {
-                            console.error("Błąd wideo YouTube:", error);
-                        }
-                    }
-                });
             } catch (e) {
                 console.error("Błąd tworzenia odtwarzacza YouTube:", e);
                  splashScreen.textContent = 'click (Błąd muzyki)';
