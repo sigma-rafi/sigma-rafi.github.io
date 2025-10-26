@@ -29,7 +29,7 @@
             font-size: 2.5rem;
             z-index: 1000;
             transition: opacity 0.5s ease-out;
-            cursor: pointer; /* Od razu pointer */
+            cursor: wait; /* Zmieni się na pointer, gdy muzyka będzie gotowa */
         }
         
         .video-background {
@@ -98,11 +98,7 @@
         }
         .icon-links a:hover { opacity: 0.7; }
 
-        .visitor-counter {
-            margin-top: 25px; opacity: 0.7; font-size: 1rem;
-            display: flex; align-items: center;
-            justify-content: center; gap: 8px;
-        }
+        /* Usunięto styl dla .visitor-counter */
         
         #modal-overlay {
             display: none; position: fixed;
@@ -144,7 +140,7 @@
 <body>
 
     <div id="splash-screen">
-        click
+        Ładowanie... 
     </div>
 
     <div class="video-overlay"></div>
@@ -174,11 +170,7 @@
                     <i class="fa-brands fa-discord"></i>
                 </a>
             </div>
-            <div class="visitor-counter">
-                <i class="fa-regular fa-eye"></i>
-                <span id="visits-count">...</span>
             </div>
-        </div>
     </main>
     
     <div id="modal-overlay"></div>
@@ -205,21 +197,21 @@
 
         // --- Funkcja Startowa ---
         splashScreen.addEventListener('click', () => {
+             // Pozwól kliknąć tylko gdy muzyka jest gotowa
+             if (!isAudioReady) return; 
+
             splashScreen.style.opacity = '0';
             setTimeout(() => { splashScreen.style.display = 'none'; }, 500);
             
             mainContent.style.display = 'flex';
             
-            // Spróbuj odtworzyć muzykę, jeśli jest gotowa
-            if (isAudioReady && audioPlayer && typeof audioPlayer.playVideo === 'function') {
+            // Odtwórz muzykę (teraz mamy pewność, że istnieje)
+            if (audioPlayer && typeof audioPlayer.playVideo === 'function') {
                 audioPlayer.setVolume(20); // Cicha muzyka
                 audioPlayer.playVideo();
-            } else {
-                console.log("Audio player not ready or failed to load when splash screen clicked.");
             }
             
-            // POPRAWKA: Uruchom licznik dopiero po kliknięciu
-            updateVisitorCount(); 
+            // Usunięto wywołanie updateVisitorCount()
         });
 
         // --- 1. Ładowanie API YouTube (Tylko dla muzyki) ---
@@ -227,11 +219,7 @@
             const tag = document.createElement('script');
             tag.src = 'https://www.youtube.com/iframe_api';
             const firstScriptTag = document.getElementsByTagName('script')[0];
-            if (firstScriptTag && firstScriptTag.parentNode) {
-                firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-            } else {
-                 document.head.appendChild(tag); // Fallback if no script tags found
-            }
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
         }
 
         window.onYouTubeIframeAPIReady = function() {
@@ -241,19 +229,24 @@
                     playerVars: { 'autoplay': 0, 'controls': 0, 'loop': 1, 'playlist': musicId },
                      events: {
                         'onReady': () => { 
-                            // Muzyka gotowa
+                            // Kiedy muzyka jest gotowa, zmień napis i flagę
+                            splashScreen.textContent = 'click';
+                            splashScreen.style.cursor = 'pointer';
                             isAudioReady = true;
-                            // Nie zmieniamy już napisu 'click', bo jest domyślnie
                         },
                          'onError': (error) => {
                              console.error("Błąd odtwarzacza YouTube:", error);
-                             isAudioReady = false; // Muzyka nie będzie grać
+                             splashScreen.textContent = 'click (Błąd muzyki)';
+                             splashScreen.style.cursor = 'pointer';
+                             isAudioReady = true; // Pozwól kontynuować bez muzyki
                          }
                     }
                 });
             } catch (e) {
                 console.error("Błąd tworzenia odtwarzacza YouTube:", e);
-                isAudioReady = false; // Muzyka nie będzie grać
+                 splashScreen.textContent = 'click (Błąd muzyki)';
+                 splashScreen.style.cursor = 'pointer';
+                 isAudioReady = true; // Pozwól kontynuować bez muzyki
             }
         }
         
@@ -280,8 +273,7 @@
                     const status = document.getElementById('discord-status');
 
                     if (!avatar || !name || !status || !card) {
-                        // Elementy mogą nie istnieć jeśli main-content jest ukryty
-                        // console.error("Nie znaleziono jednego lub więcej elementów Discord");
+                        console.error("Nie znaleziono jednego lub więcej elementów Discord");
                         return;
                     }
 
@@ -306,8 +298,7 @@
                     status.textContent = statusText;
                 })
                 .catch(error => {
-                    // Ten błąd jest normalny, jeśli strona jest otwarta długo bez internetu
-                    // console.error('Błąd fetch Lanyard:', error); 
+                    console.error('Błąd fetch Lanyard:', error);
                      const name = document.getElementById('discord-name');
                      const status = document.getElementById('discord-status');
                      if(name) name.textContent = 'Błąd';
@@ -315,43 +306,13 @@
                 });
         }
         try {
-           getLanyardData(); // Uruchom od razu
-           setInterval(getLanyardData, 10000); // Odświeżaj co 10 sekund
+           getLanyardData();
+           setInterval(getLanyardData, 10000);
         } catch (e) {
            console.error("Nie udało się ustawić odpytywania Lanyard:", e);
         }
 
-
-        // --- 3. Licznik Odwiedzin (CountAPI) ---
-        function updateVisitorCount() {
-            const apiKey = '1206130401232289823-sigma-rafi'; 
-            const visitsSpan = document.getElementById('visits-count');
-            
-            if (visitsSpan) {
-                fetch(`https://api.countapi.xyz/hit/${apiKey}/visits`)
-                    .then(response => {
-                        if (!response.ok) {
-                             throw new Error(`Odpowiedź sieciowa nie była OK, status: ${response.status}`);
-                        }
-                         return response.json();
-                    })
-                    .then(data => {
-                        if (data && typeof data.value !== 'undefined') {
-                            visitsSpan.textContent = data.value;
-                        } else {
-                            console.error('Błąd licznika: Nieprawidłowy format danych', data);
-                             visitsSpan.textContent = '??';
-                        }
-                    })
-                    .catch(error => {
-                        // Błąd ERR_NAME_NOT_RESOLVED oznacza problem z siecią/DNS. Kod jest OK.
-                        console.error('Błąd fetch licznika:', error); 
-                        visitsSpan.textContent = '??'; 
-                    });
-            } else {
-                 console.error("Nie znaleziono elementu #visits-count dla licznika.");
-            }
-        }
+        // --- 3. Usunięto funkcję updateVisitorCount() ---
         
         // --- 4. Logika Modala ---
         const modalOverlay = document.getElementById('modal-overlay');
