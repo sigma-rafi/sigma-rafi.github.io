@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>sigma rafi</title>
     
-    <link rel="icon" href="icon.png" type="image/png">
+    <link rel="icon" href="https://cdn.discordapp.com/attachments/1327684785748967425/1431979950721732859/icon.png?ex=68ff62c1&is=68fe1141&hm=23e0d83dd9d9665883648660dba2a0230644569665c6bece67dfacde38ac4d70&" type="image/png">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,7 +29,7 @@
             font-size: 2.5rem;
             z-index: 1000;
             transition: opacity 0.5s ease-out;
-            cursor: wait; /* Zmieni się na pointer, gdy muzyka będzie gotowa */
+            cursor: wait;
         }
         
         .video-background {
@@ -97,8 +97,6 @@
             transition: opacity 0.2s;
         }
         .icon-links a:hover { opacity: 0.7; }
-
-        /* Usunięto styl dla .visitor-counter */
         
         #modal-overlay {
             display: none; position: fixed;
@@ -145,7 +143,7 @@
 
     <div class="video-overlay"></div>
     <video autoplay muted loop playsinline class="video-background">
-        <source src="tlo.mp4" type="video/mp4">
+        <source src="https://cdn.discordapp.com/attachments/1327684785748967425/1431980055126474965/tlo.mp4?ex=68ff62da&is=68fe115a&hm=881deffeb62aefc2a0fc67a58761efe97a9a9a5190d3dc322bcdc2c4d299d7f8&" type="video/mp4">
         Twoja przeglądarka nie obsługuje wideo.
     </video>
     
@@ -170,7 +168,7 @@
                     <i class="fa-brands fa-discord"></i>
                 </a>
             </div>
-            </div>
+        </div>
     </main>
     
     <div id="modal-overlay"></div>
@@ -184,20 +182,16 @@
     </div>
 
     <script>
-        // --- ID Elementów ---
         const splashScreen = document.getElementById('splash-screen');
         const mainContent = document.getElementById('main-content');
         
-        // --- Linki do mediów ---
-        const musicId = 'E2XlrfITyCk'; // Muzyka KSLV Noh
+        const musicId = 'E2XlrfITyCk';
         const discordUserId = '1206130401232289823'; 
 
         let audioPlayer; 
-        let isAudioReady = false; // Flaga sprawdzająca, czy muzyka jest gotowa
+        let isAudioReady = false;
 
-        // --- Funkcja Startowa ---
         splashScreen.addEventListener('click', () => {
-             // Pozwól kliknąć tylko gdy muzyka jest gotowa
              if (!isAudioReady) return; 
 
             splashScreen.style.opacity = '0';
@@ -205,16 +199,12 @@
             
             mainContent.style.display = 'flex';
             
-            // Odtwórz muzykę (teraz mamy pewność, że istnieje)
             if (audioPlayer && typeof audioPlayer.playVideo === 'function') {
-                audioPlayer.setVolume(20); // Cicha muzyka
+                audioPlayer.setVolume(20);
                 audioPlayer.playVideo();
             }
-            
-            // Usunięto wywołanie updateVisitorCount()
         });
 
-        // --- 1. Ładowanie API YouTube (Tylko dla muzyki) ---
         function loadYouTubeAPI() {
             const tag = document.createElement('script');
             tag.src = 'https://www.youtube.com/iframe_api';
@@ -229,7 +219,6 @@
                     playerVars: { 'autoplay': 0, 'controls': 0, 'loop': 1, 'playlist': musicId },
                      events: {
                         'onReady': () => { 
-                            // Kiedy muzyka jest gotowa, zmień napis i flagę
                             splashScreen.textContent = 'click';
                             splashScreen.style.cursor = 'pointer';
                             isAudioReady = true;
@@ -238,7 +227,7 @@
                              console.error("Błąd odtwarzacza YouTube:", error);
                              splashScreen.textContent = 'click (Błąd muzyki)';
                              splashScreen.style.cursor = 'pointer';
-                             isAudioReady = true; // Pozwól kontynuować bez muzyki
+                             isAudioReady = true;
                          }
                     }
                 });
@@ -246,13 +235,12 @@
                 console.error("Błąd tworzenia odtwarzacza YouTube:", e);
                  splashScreen.textContent = 'click (Błąd muzyki)';
                  splashScreen.style.cursor = 'pointer';
-                 isAudioReady = true; // Pozwól kontynuować bez muzyki
+                 isAudioReady = true;
             }
         }
         
         loadYouTubeAPI(); 
 
-        // --- 2. Ładowanie Statusu Discord (Lanyard) ---
         function getLanyardData() {
             fetch(`https://api.lanyard.rest/v1/users/${discordUserId}`)
                 .then(response => {
@@ -311,10 +299,7 @@
         } catch (e) {
            console.error("Nie udało się ustawić odpytywania Lanyard:", e);
         }
-
-        // --- 3. Usunięto funkcję updateVisitorCount() ---
         
-        // --- 4. Logika Modala ---
         const modalOverlay = document.getElementById('modal-overlay');
         const modalBox = document.getElementById('modal-box');
         const modalConfirm = document.getElementById('modal-confirm');
