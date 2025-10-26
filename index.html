@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>sigma rafi</title>
     
-    <link rel="icon" href="https://cdn.discordapp.com/attachments/1327684785748967425/1431979950721732859/icon.png?ex=68ff62c1&is=68fe1141&hm=23e0d83dd9d9665883648660dba2a0230644569665c6bece67dfacde38ac4d70&" type="image/png">
+    <link rel="icon" href="https://cdn.discordapp.com/attachments/1327684785748967425/1431979950721732859/icon.png?ex=68ff62c1&is=68fe1141&hm=23e0d83dd9d9665883648660dba2a0230644569665c6bece67dfacde38ac4d70&" type="image/png" />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 
     <style>
         * {
@@ -19,7 +19,6 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
         body, html {
             height: 100%;
             background-color: #000;
@@ -27,7 +26,6 @@
             font-family: 'Inter', sans-serif;
             overflow: hidden;
         }
-        
         #splash-screen {
             position: fixed;
             top: 0;
@@ -43,7 +41,6 @@
             transition: opacity 0.5s ease-out;
             cursor: wait;
         }
-        
         #bg-video {
             position: fixed;
             right: 0;
@@ -56,12 +53,10 @@
             background-size: cover;
             object-fit: cover;
         }
-
         #audio-player {
             position: fixed;
             top: -9999px;
         }
-        
         .video-overlay {
             position: fixed;
             top: 0;
@@ -72,7 +67,6 @@
             background: rgba(0, 0, 0, 0.3);
             pointer-events: none;
         }
-        
         #main-content {
             display: none;
             flex-direction: column;
@@ -84,7 +78,6 @@
             position: relative;
             z-index: 10;
         }
-        
         .profile-container {
             background: rgba(0, 0, 0, 0.25);
             border-radius: 12px;
@@ -92,19 +85,8 @@
             backdrop-filter: blur(8px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
-
-        h1 {
-            margin: 0;
-            font-size: 3rem;
-            font-weight: 700;
-        }
-        
-        p {
-            margin: 5px 0 20px 0;
-            font-size: 1.2rem;
-            opacity: 0.8;
-        }
-
+        h1 { margin: 0; font-size: 3rem; font-weight: 700; }
+        p { margin: 5px 0 20px 0; font-size: 1.2rem; opacity: 0.8; }
         #discord-card {
             display: flex;
             align-items: center;
@@ -115,50 +97,22 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             transition: border-color 0.3s ease;
         }
-        
-        #discord-card.online {
-            border-left: 5px solid #3ba55d;
-        }
-        
-        #discord-card.idle {
-            border-left: 5px solid #faa81a;
-        }
-        
-        #discord-card.dnd {
-            border-left: 5px solid #ed4245;
-        }
-        
-        #discord-card.offline {
-            border-left: 5px solid #747f8d;
-        }
-
+        #discord-card.online { border-left: 5px solid #3ba55d; }
+        #discord-card.idle { border-left: 5px solid #faa81a; }
+        #discord-card.dnd { border-left: 5px solid #ed4245; }
+        #discord-card.offline { border-left: 5px solid #747f8d; }
         #discord-avatar {
             width: 50px;
             height: 50px;
             border-radius: 50%;
             margin-right: 15px;
         }
-        
-        #discord-info {
-            text-align: left;
-        }
-        
-        #discord-name {
-            display: block;
-            font-weight: 700;
-        }
-        
-        #discord-status {
-            display: block;
-            font-size: 0.9rem;
-            opacity: 0.9;
-            font-style: italic;
-        }
-
+        #discord-info { text-align: left; }
+        #discord-name { display: block; font-weight: 700; }
+        #discord-status { display: block; font-size: 0.9rem; opacity: 0.9; font-style: italic; }
         .icon-links {
             margin-top: 25px;
         }
-        
         .icon-links a {
             color: white;
             text-decoration: none;
@@ -166,28 +120,20 @@
             margin: 0 15px;
             transition: opacity 0.2s;
         }
-        
-        .icon-links a:hover {
-            opacity: 0.7;
-        }
-        
+        .icon-links a:hover { opacity: 0.7; }
         #modal-overlay {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(5px);
             z-index: 2000;
         }
-        
         #modal-box {
             display: none;
             position: fixed;
-            top: 50%;
-            left: 50%;
+            top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             background: #181818;
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -199,24 +145,14 @@
             text-align: left;
             box-shadow: 0 5px 20px rgba(0,0,0,0.4);
         }
-        
-        #modal-box h2 {
-            margin-top: 0;
-            font-size: 1.5rem;
-        }
-        
-        #modal-box p {
-            font-size: 1rem;
-            opacity: 0.9;
-        }
-        
+        #modal-box h2 { margin-top: 0; font-size: 1.5rem; }
+        #modal-box p { font-size: 1rem; opacity: 0.9; }
         #modal-buttons {
             margin-top: 20px;
             display: flex;
             justify-content: flex-end;
             gap: 10px;
         }
-        
         #modal-buttons button {
             border: none;
             border-radius: 6px;
@@ -227,21 +163,17 @@
             cursor: pointer;
             transition: background-color 0.2s;
         }
-        
         #modal-cancel {
             background-color: #4f4f4f;
             color: white;
         }
-        
         #modal-cancel:hover {
             background-color: #5a5a5a;
         }
-        
         #modal-confirm {
             background-color: #5865F2;
             color: white;
         }
-        
         #modal-confirm:hover {
             background-color: #4a54c9;
         }
@@ -252,7 +184,7 @@
     <div id="splash-screen">Ładowanie...</div>
 
     <video id="bg-video" autoplay muted loop playsinline>
-        <source src="assets/tlo.mp4" type="video/mp4">
+        <source src="assets/tlo.mp4" type="video/mp4" />
     </video>
     
     <div class="video-overlay"></div>
@@ -264,7 +196,7 @@
             <h1>sigma rafi</h1>
             <p>Witaj</p>
             <div id="discord-card" class="offline">
-                <img id="discord-avatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Avatar">
+                <img id="discord-avatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Avatar" />
                 <div id="discord-info">
                     <span id="discord-name">Łączenie...</span>
                     <span id="discord-status">Pobieranie statusu</span>
@@ -295,16 +227,16 @@
         const splashScreen = document.getElementById('splash-screen');
         const mainContent = document.getElementById('main-content');
         const bgVideo = document.getElementById('bg-video');
-        
+
         const musicId = 'E2XlrfITyCk';
         const discordUserId = '1206130401232289823';
 
         let audioPlayer;
         let isAudioReady = false;
 
-        // Próba automatycznego odtworzenia wideo
+        // Próbuj odtworzyć wideo na początku
         bgVideo.play().catch(e => {
-            console.log('Autoplay wideo zablokowany:', e);
+            console.log('Autoplay wideo zablokowany lub wystąpił błąd:', e);
         });
 
         splashScreen.addEventListener('click', () => {
@@ -316,11 +248,13 @@
             }, 500);
             
             mainContent.style.display = 'flex';
-            
-            // Odtwórz wideo (na wypadek gdyby autoplay nie zadziałał)
-            bgVideo.play().catch(e => console.log('Błąd odtwarzania wideo:', e));
-            
-            // Odtwórz muzykę
+
+            // Odtwarzanie wideo po kliknięciu
+            bgVideo.play().catch(e => {
+                console.log('Błąd odtwarzania wideo po kliknięciu:', e);
+            });
+
+            // Odtwarzanie muzyki
             if (audioPlayer && typeof audioPlayer.playVideo === 'function') {
                 audioPlayer.setVolume(20);
                 audioPlayer.playVideo();
@@ -367,7 +301,7 @@
                 isAudioReady = true;
             }
         }
-        
+
         loadYouTubeAPI();
 
         function getLanyardData() {
@@ -422,21 +356,21 @@
                     if(status) status.textContent = 'Nie można połączyć';
                 });
         }
-        
+
         try {
             getLanyardData();
             setInterval(getLanyardData, 10000);
         } catch (e) {
             console.error("Nie udało się ustawić odpytywania Lanyard:", e);
         }
-        
+
         const modalOverlay = document.getElementById('modal-overlay');
         const modalBox = document.getElementById('modal-box');
         const modalConfirm = document.getElementById('modal-confirm');
         const modalCancel = document.getElementById('modal-cancel');
         let targetUrl = '';
         const confirmLinks = document.querySelectorAll('.confirm-link');
-        
+
         if (modalOverlay && modalBox && modalConfirm && modalCancel) {
             confirmLinks.forEach(link => {
                 link.addEventListener('click', (event) => {
@@ -446,7 +380,7 @@
                     modalBox.style.display = 'block';
                 });
             });
-            
+
             function closeModal() {
                 modalOverlay.style.display = 'none';
                 modalBox.style.display = 'none';
@@ -455,7 +389,7 @@
 
             modalCancel.addEventListener('click', closeModal);
             modalOverlay.addEventListener('click', closeModal);
-            
+
             modalConfirm.addEventListener('click', () => {
                 if (targetUrl) {
                     window.open(targetUrl, '_blank');
@@ -466,6 +400,5 @@
             console.error("Nie znaleziono jednego lub więcej elementów modala.");
         }
     </script>
-
 </body>
 </html>
