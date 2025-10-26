@@ -14,14 +14,26 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <style>
-        body, html {
-            height: 100%; margin: 0; padding: 0;
-            background-color: #000; color: white;
-            font-family: 'Inter', sans-serif; overflow: hidden;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+        
+        body, html {
+            height: 100%;
+            background-color: #000;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+        
         #splash-screen {
-            position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background: #000;
             display: flex;
             justify-content: center;
@@ -32,121 +44,218 @@
             cursor: wait;
         }
         
-        .video-background {
+        #bg-video {
             position: fixed;
-            top: 50%;
-            left: 50%;
+            right: 0;
+            bottom: 0;
             min-width: 100%;
             min-height: 100%;
             width: auto;
             height: auto;
-            transform: translate(-50%, -50%);
-            z-index: -2;
-            pointer-events: none;
+            z-index: -10;
+            background-size: cover;
             object-fit: cover;
         }
 
-        #audio-player { position: fixed; top: -9999px; }
+        #audio-player {
+            position: fixed;
+            top: -9999px;
+        }
+        
         .video-overlay {
-            position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: -1; 
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
             background: rgba(0, 0, 0, 0.3);
             pointer-events: none;
         }
+        
         #main-content {
-            display: none; flex-direction: column;
-            justify-content: center; align-items: center;
-            height: 100%; text-align: center;
-            padding: 20px; box-sizing: border-box;
-            position: relative; z-index: 10;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            text-align: center;
+            padding: 20px;
+            position: relative;
+            z-index: 10;
         }
         
         .profile-container {
-            background: rgba(0, 0, 0, 0.25); 
+            background: rgba(0, 0, 0, 0.25);
             border-radius: 12px;
             padding: 25px 40px;
             backdrop-filter: blur(8px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        h1 { margin: 0; font-size: 3rem; font-weight: 700; }
-        p { margin: 5px 0 20px 0; font-size: 1.2rem; opacity: 0.8; }
+        h1 {
+            margin: 0;
+            font-size: 3rem;
+            font-weight: 700;
+        }
+        
+        p {
+            margin: 5px 0 20px 0;
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
 
         #discord-card {
-            display: flex; align-items: center;
+            display: flex;
+            align-items: center;
             background: rgba(0, 0, 0, 0.5);
-            border-radius: 8px; padding: 10px 15px;
+            border-radius: 8px;
+            padding: 10px 15px;
             min-width: 250px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             transition: border-color 0.3s ease;
         }
-        #discord-card.online { border-left: 5px solid #3ba55d; }
-        #discord-card.idle { border-left: 5px solid #faa81a; }
-        #discord-card.dnd { border-left: 5px solid #ed4245; }
-        #discord-card.offline { border-left: 5px solid #747f8d; }
+        
+        #discord-card.online {
+            border-left: 5px solid #3ba55d;
+        }
+        
+        #discord-card.idle {
+            border-left: 5px solid #faa81a;
+        }
+        
+        #discord-card.dnd {
+            border-left: 5px solid #ed4245;
+        }
+        
+        #discord-card.offline {
+            border-left: 5px solid #747f8d;
+        }
 
-        #discord-avatar { width: 50px; height: 50px; border-radius: 50%; margin-right: 15px; }
-        #discord-info { text-align: left; }
-        #discord-name { display: block; font-weight: 700; }
-        #discord-status { display: block; font-size: 0.9rem; opacity: 0.9; font-style: italic; }
+        #discord-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 15px;
+        }
+        
+        #discord-info {
+            text-align: left;
+        }
+        
+        #discord-name {
+            display: block;
+            font-weight: 700;
+        }
+        
+        #discord-status {
+            display: block;
+            font-size: 0.9rem;
+            opacity: 0.9;
+            font-style: italic;
+        }
 
-        .icon-links { margin-top: 25px; }
+        .icon-links {
+            margin-top: 25px;
+        }
+        
         .icon-links a {
-            color: white; text-decoration: none;
-            font-size: 2rem; margin: 0 15px;
+            color: white;
+            text-decoration: none;
+            font-size: 2rem;
+            margin: 0 15px;
             transition: opacity 0.2s;
         }
-        .icon-links a:hover { opacity: 0.7; }
+        
+        .icon-links a:hover {
+            opacity: 0.7;
+        }
         
         #modal-overlay {
-            display: none; position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(5px);
             z-index: 2000;
         }
+        
         #modal-box {
-            display: none; position: fixed;
-            top: 50%; left: 50%;
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
             transform: translate(-50%, -50%);
             background: #181818;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px; padding: 25px;
-            width: 90%; max-width: 400px;
-            z-index: 2001; text-align: left;
+            border-radius: 12px;
+            padding: 25px;
+            width: 90%;
+            max-width: 400px;
+            z-index: 2001;
+            text-align: left;
             box-shadow: 0 5px 20px rgba(0,0,0,0.4);
         }
-        #modal-box h2 { margin-top: 0; font-size: 1.5rem; }
-        #modal-box p { font-size: 1rem; opacity: 0.9; }
-        #modal-buttons {
-            margin-top: 20px; display: flex;
-            justify-content: flex-end; gap: 10px;
+        
+        #modal-box h2 {
+            margin-top: 0;
+            font-size: 1.5rem;
         }
+        
+        #modal-box p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        #modal-buttons {
+            margin-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
         #modal-buttons button {
-            border: none; border-radius: 6px;
-            padding: 10px 15px; font-size: 1rem;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 15px;
+            font-size: 1rem;
             font-family: 'Inter', sans-serif;
-            font-weight: 700; cursor: pointer;
+            font-weight: 700;
+            cursor: pointer;
             transition: background-color 0.2s;
         }
-        #modal-cancel { background-color: #4f4f4f; color: white; }
-        #modal-cancel:hover { background-color: #5a5a5a; }
-        #modal-confirm { background-color: #5865F2; color: white; }
-        #modal-confirm:hover { background-color: #4a54c9; }
+        
+        #modal-cancel {
+            background-color: #4f4f4f;
+            color: white;
+        }
+        
+        #modal-cancel:hover {
+            background-color: #5a5a5a;
+        }
+        
+        #modal-confirm {
+            background-color: #5865F2;
+            color: white;
+        }
+        
+        #modal-confirm:hover {
+            background-color: #4a54c9;
+        }
     </style>
 </head>
 <body>
 
-    <div id="splash-screen">
-        Ładowanie... 
-    </div>
+    <div id="splash-screen">Ładowanie...</div>
 
-    <div class="video-overlay"></div>
-    <video autoplay muted loop playsinline class="video-background">
+    <video id="bg-video" autoplay muted loop playsinline>
         <source src="https://files.catbox.moe/krmxlp.mp4" type="video/mp4">
-        Twoja przeglądarka nie obsługuje wideo.
     </video>
+    
+    <div class="video-overlay"></div>
     
     <div id="audio-player"></div>
 
@@ -185,21 +294,33 @@
     <script>
         const splashScreen = document.getElementById('splash-screen');
         const mainContent = document.getElementById('main-content');
+        const bgVideo = document.getElementById('bg-video');
         
         const musicId = 'E2XlrfITyCk';
-        const discordUserId = '1206130401232289823'; 
+        const discordUserId = '1206130401232289823';
 
         let audioPlayer;
         let isAudioReady = false;
 
+        // Próba automatycznego odtworzenia wideo
+        bgVideo.play().catch(e => {
+            console.log('Autoplay wideo zablokowany:', e);
+        });
+
         splashScreen.addEventListener('click', () => {
-             if (!isAudioReady) return; 
+            if (!isAudioReady) return;
 
             splashScreen.style.opacity = '0';
-            setTimeout(() => { splashScreen.style.display = 'none'; }, 500);
+            setTimeout(() => {
+                splashScreen.style.display = 'none';
+            }, 500);
             
             mainContent.style.display = 'flex';
             
+            // Odtwórz wideo (na wypadek gdyby autoplay nie zadziałał)
+            bgVideo.play().catch(e => console.log('Błąd odtwarzania wideo:', e));
+            
+            // Odtwórz muzykę
             if (audioPlayer && typeof audioPlayer.playVideo === 'function') {
                 audioPlayer.setVolume(20);
                 audioPlayer.playVideo();
@@ -216,31 +337,38 @@
         window.onYouTubeIframeAPIReady = function() {
             try {
                 audioPlayer = new YT.Player('audio-player', {
-                    height: '1', width: '1', videoId: musicId,
-                    playerVars: { 'autoplay': 0, 'controls': 0, 'loop': 1, 'playlist': musicId },
-                     events: {
-                        'onReady': () => { 
+                    height: '1',
+                    width: '1',
+                    videoId: musicId,
+                    playerVars: {
+                        'autoplay': 0,
+                        'controls': 0,
+                        'loop': 1,
+                        'playlist': musicId
+                    },
+                    events: {
+                        'onReady': () => {
                             splashScreen.textContent = 'click';
                             splashScreen.style.cursor = 'pointer';
                             isAudioReady = true;
                         },
-                         'onError': (error) => {
-                             console.error("Błąd odtwarzacza YouTube:", error);
-                             splashScreen.textContent = 'click (Błąd muzyki)';
-                             splashScreen.style.cursor = 'pointer';
-                             isAudioReady = true;
-                         }
+                        'onError': (error) => {
+                            console.error("Błąd odtwarzacza YouTube:", error);
+                            splashScreen.textContent = 'click (Błąd muzyki)';
+                            splashScreen.style.cursor = 'pointer';
+                            isAudioReady = true;
+                        }
                     }
                 });
             } catch (e) {
                 console.error("Błąd tworzenia odtwarzacza YouTube:", e);
-                 splashScreen.textContent = 'click (Błąd muzyki)';
-                 splashScreen.style.cursor = 'pointer';
-                 isAudioReady = true;
+                splashScreen.textContent = 'click (Błąd muzyki)';
+                splashScreen.style.cursor = 'pointer';
+                isAudioReady = true;
             }
         }
         
-        loadYouTubeAPI(); 
+        loadYouTubeAPI();
 
         function getLanyardData() {
             fetch(`https://api.lanyard.rest/v1/users/${discordUserId}`)
@@ -249,12 +377,12 @@
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
                     return response.json();
-                 })
+                })
                 .then(data => {
                     if (!data.success) {
-                         console.error('Lanyard API zwróciło success:false');
-                         return; 
-                    };
+                        console.error('Lanyard API zwróciło success:false');
+                        return;
+                    }
                     const presence = data.data;
                     const card = document.getElementById('discord-card');
                     const avatar = document.getElementById('discord-avatar');
@@ -268,19 +396,19 @@
 
                     avatar.src = `https://cdn.discordapp.com/avatars/${presence.discord_user.id}/${presence.discord_user.avatar}.png`;
                     name.textContent = presence.discord_user.username;
-                    card.className = presence.discord_status || 'offline'; 
+                    card.className = presence.discord_status || 'offline';
 
                     let statusText = 'Offline';
                     if (presence.discord_status && presence.discord_status !== 'offline') {
                         if (presence.activities && presence.activities.length > 0) {
-                            statusText = presence.activities[0].name || 'Aktywność'; 
+                            statusText = presence.activities[0].name || 'Aktywność';
                             if (presence.activities[0].details) statusText += `: ${presence.activities[0].details}`;
                         } else {
                             switch(presence.discord_status) {
                                 case 'online': statusText = 'Online'; break;
                                 case 'idle': statusText = 'Zaraz wracam'; break;
                                 case 'dnd': statusText = 'Nie przeszkadzać'; break;
-                                default: statusText = 'Online'; 
+                                default: statusText = 'Online';
                             }
                         }
                     }
@@ -288,31 +416,32 @@
                 })
                 .catch(error => {
                     console.error('Błąd fetch Lanyard:', error);
-                     const name = document.getElementById('discord-name');
-                     const status = document.getElementById('discord-status');
-                     if(name) name.textContent = 'Błąd';
-                     if(status) status.textContent = 'Nie można połączyć';
+                    const name = document.getElementById('discord-name');
+                    const status = document.getElementById('discord-status');
+                    if(name) name.textContent = 'Błąd';
+                    if(status) status.textContent = 'Nie można połączyć';
                 });
         }
+        
         try {
-           getLanyardData();
-           setInterval(getLanyardData, 10000);
+            getLanyardData();
+            setInterval(getLanyardData, 10000);
         } catch (e) {
-           console.error("Nie udało się ustawić odpytywania Lanyard:", e);
+            console.error("Nie udało się ustawić odpytywania Lanyard:", e);
         }
         
         const modalOverlay = document.getElementById('modal-overlay');
         const modalBox = document.getElementById('modal-box');
         const modalConfirm = document.getElementById('modal-confirm');
         const modalCancel = document.getElementById('modal-cancel');
-        let targetUrl = ''; 
+        let targetUrl = '';
         const confirmLinks = document.querySelectorAll('.confirm-link');
         
         if (modalOverlay && modalBox && modalConfirm && modalCancel) {
             confirmLinks.forEach(link => {
                 link.addEventListener('click', (event) => {
-                    event.preventDefault(); 
-                    targetUrl = event.currentTarget.href; 
+                    event.preventDefault();
+                    targetUrl = event.currentTarget.href;
                     modalOverlay.style.display = 'block';
                     modalBox.style.display = 'block';
                 });
@@ -325,12 +454,12 @@
             }
 
             modalCancel.addEventListener('click', closeModal);
-            modalOverlay.addEventListener('click', closeModal); 
+            modalOverlay.addEventListener('click', closeModal);
             
             modalConfirm.addEventListener('click', () => {
-                 if (targetUrl) { 
-                    window.open(targetUrl, '_blank'); 
-                 }
+                if (targetUrl) {
+                    window.open(targetUrl, '_blank');
+                }
                 closeModal();
             });
         } else {
