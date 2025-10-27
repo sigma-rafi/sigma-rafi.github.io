@@ -41,6 +41,7 @@
             transition: opacity 0.5s ease-out;
             cursor: wait;
         }
+        /* STYLA DLA WIDEO: jest poprawne, upewniamy się, że object-fit: cover działa */
         #bg-video {
             position: fixed;
             right: 0;
@@ -50,8 +51,8 @@
             width: auto;
             height: auto;
             z-index: -10;
+            object-fit: cover; 
             background-size: cover;
-            object-fit: cover;
         }
         #audio-player {
             position: fixed;
@@ -183,10 +184,11 @@
 
     <div id="splash-screen">Ładowanie...</div>
 
-    <video id="bg-video" autoplay muted loop playsinline>
+    <video id="bg-video" autoplay muted loop playsinline poster="assets/tlo.jpg">
+        <source src="assets/tlo.webm" type="video/webm" /> 
         <source src="assets/tlo.mp4" type="video/mp4" />
+        Twoja przeglądarka nie obsługuje tagu wideo.
     </video>
-    
     <div class="video-overlay"></div>
     
     <div id="audio-player"></div>
